@@ -1,0 +1,87 @@
+#!/bin/bash
+# Batch processing of large collections of HDR exposures
+# Merge RAW files from individual directories (creates with pfs_split_exposures) into HDR images
+
+if test -z "$1" || test "$1" = "--help"; then
+cat <<EOF
+Merge RAW/JPEG images in each subdirectory of the current directory and write the merged HDR image to the "merged" directory.
+
+Usage: pfs_automerge [--align] [--dest <dir>] [--format (exr|hdr)] <dir> 
+
+See the man page for more information.
+EOF
+    exit 1
+fi
+
+do_align=false
+DESTDIR=merged
+METHOD=robertson
+FORMAT=exr
+
+#Arguments used for all images passed to pfsout
+if test -n "$1"; then
+    while test "${1:0:1}" = "-"; do
+        
+        if [ "$1" = "-a" ] || [ "$1" = "--align" ]; then
+            do_align=true
+        elif [ "$1" = "-d" ] || [ "$1" = "--dest" ]; then
+            shift             
+            DESTDIR=$1
+        elif [ "$1" = "-f" ] || [ "$1" = "--format" ]; then
+            shift             
+            FORMAT=$1
+            if [ "$FORMAT" != "exr" ] && [ "$FORMAT" != "hdr" ]; then
+                echo "Unrecognized format '$1'. Must be 'exr' or 'hdr'"
+                exit 1
+            fi
+        else   
+            echo "Unrecognized option $1"
+            exit 1
+        fi
+        shift           
+    done
+fi
+
+if $do_align; then 
+    echo "Images will be aligned before merging"
+fi
+
+SRCDIR=$1
+
+mkdir -p $DESTDIR
+
+for dir in `find $SRCDIR -mindepth 1 -type d`; do
+
+    base_name=`basename "$dir"`
+    echo "Processing $base_name"
+
+    EXT=""
+#    test -n "`find $dir -name *.jpg`" && EXT="jpg"
+#    test -n "`find $dir -name *.JPG`" && EXT="JPG"
+    test -n "`find $dir -name '*.ARW'`" && EXT="ARW"
+    test -n "`find $dir -name '*.DNG'`" && EXT="DNG"
+    test -n "`find $dir -name '*.CR2'`" && EXT="CR2"
+    test -n "`find $dir -name '*.cr2'`" && EXT="cr2"
+
+    if test -z "$EXT"; then
+        echo "No recognized images found, skipping the directory"
+    else
+        echo "  extension: $EXT"
+
+        DEST_FILE="${DESTDIR}/${base_name}.${FORMAT}"
+
+        if [ -f ${DEST_FILE} ]; then
+            echo "  destination file exist, merging skipped"
+        else
+            echo "  merging $DEST_FILE"
+
+            if $do_align; then
+                pfsinme $dir/*.$EXT | pfsalign -v -c min | pfshdrcalibrate -d -c $METHOD -r linear --bpp 16 --verbose | pfsout $DEST_FILE
+            else
+                pfsinme $dir/*.$EXT | pfshdrcalibrate -c $METHOD -r linear --bpp 16 --verbose | pfsout $DEST_FILE
+            fi
+
+        fi
+    fi
+    
+done

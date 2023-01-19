@@ -1,0 +1,65 @@
+pfstools can be compiled with Visual Studio using CMake build system. This file contains some troubleshooting hints.
+
+Refer to README for details on building pfstools using CMake.
+
+The compilation was tested with Visual Studio Community 2019, 64-bit.
+
+As of 6/10/2019 only a portion of the pfstools programs can be compiled with MSVC. 
+This is partly because the code uses a feautures or includes not available in MSVC. 
+To compile selected programs, you will probably need to comment out in src/CMakeFiles.txt
+selected directories. 
+
+To compile a native version of pfsview on Windows, check README.MinGW.
+
+Note that this compilation procedure is an alternative to using cygwin (refer to README.Cygwin). One exception is pfsview, which works better when natively compiled with Qt5 for Windows rather than with XWindow cleint in cygwin.
+
+=== zlib ===
+
+zlib (http://www.zlib.net/) is required to compile pfstools. You can download pre-compiled libraries from:
+
+https://www.bruot.org/hp/libraries/
+
+then update CMakeLists.txt to include the relevant path. Find the commented lines:
+
+%SET(ZLIB_DIR "C:/<path>")
+%SET(CMAKE_INCLUDE_PATH ${ZLIB_DIR}/include ${CMAKE_INCLUDE_PATH})
+%SET(CMAKE_LIBRARY_PATH ${ZLIB_DIR}/ ${ZLIB_DIR}/lib ${CMAKE_LIBRARY_PATH})
+
+uncomment them and update the path.
+
+=== QT ===
+
+Update from 6/10/2019: Qt (pfsview) compilation with VisualStudio is not tested. This is because Qt does not support Visual Studio C++ 2019, which is the only available download at the Microsoft web pages. 
+
+Update from 27/12/2019: QT provides the libraries for VisualStudio 2019 now but compilation results in a long list of errors. Giving up. pfsview compiled with MinGW GCC works fine. 
+
+Download and install Qt5 for Visual Studio from: http://qt-project.org/downloads
+
+Then add entry to CMake variables:
+-DQt5_DIR=C:/Qt/5.13.0/msvc2017_64/lib/cmake/Qt5
+where C:/Qt/5.13.0/msvc2017_64/lib/cmake/Qt5 should be replaced with the path to qmake on your computer. Use "/" instead of "\"
+
+??You may need to compile in Release mode. Otherwise some DLLs might be missing.
+
+=== OpenEXR ===
+
+Compiling OpenEXR on Windows with Visual Studio is not a task for faint hearted. Be prepared to fix quite a few issues with the code.
+
+* If the compiler complains about missing "__builtin_trap()", add 
+
+#define PLATFORM_WINDOWS 1
+
+to config/IlmBaseConfig.h 
+
+see
+
+https://lists.nongnu.org/archive/html/openexr-devel/2013-12/msg00001.html
+
+* If the compiler complains about "std::max", add missing include in all offending files:
+
+#include <algorithm>
+
+Other useful web pages:
+
+http://buildopenexr.blogspot.co.uk/
+http://blog.gmane.org/gmane.comp.video.openexr.devel

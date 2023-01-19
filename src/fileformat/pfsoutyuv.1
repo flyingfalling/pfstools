@@ -1,0 +1,78 @@
+.TH "pfsoutyuv" 1
+.SH NAME
+pfsoutyuv \- Write frames to .yuv file used by many video codecs
+.SH SYNOPSIS
+.B pfsoutyuv [--verbose] [--quiet] [--bitdepth] [--colorspace] [--downsample-filter] [--chroma-format] 
+<file> [<file>...]
+
+.SH DESCRIPTION
+Use this command to write the pfsstream to an uncompressed .yuv file.
+.PP
+If the output color space is LDR (bt709), the input pfs stream should be in the gamma corrected sRGB color space. If the output color space is HDR (pq2020 or hgl2020), the input pfs stream should be in linear RGB color space. 
+.SH OPTIONS
+.TP
+.B \--bitdepth, -b
+bit-depth of the integer values stored in the yuv file. a single color component is stored as a byte if bit-depth is 8, or as two bytes otherwise. default: 10 [bits]
+.TP
+.B \--colorspace, -c
+Currently it can be either: 
+.IP
+.I pq2020
+for HDR images with BT.2020 colorspace and PQ transfer function, or 
+.IP
+.I hlg2020
+for HDR images with BT.2020 colorspace and HLG transfer function, or 
+.IP
+.I bt709
+for LDR images in BT.709 (rec.709) colorspace without any transfer function.
+.PP
+If no option is specified, colorspace is inferred from the LUMINANCE tag in the pfsstream: pq2020 if LUMINANCE is ABSOLUTE or RELATIVE, bt709 if LUMINANCE is DISPLAY.
+.TP
+.B \--chroma-format, -f
+The sampling format for the chroma channels. Can be one of:
+.IP
+.I 444
+The standard 4:4:4 format with no chroma downsampling.
+.IP
+.I 420
+The 4:2:0 format with both colour channels being downsampled by half.
+.IP 
+default: 420
+.TP
+.B \--downsample-filter, -f
+The filter weights used when downsampling to 4:2:0. Can be either
+.IP
+.I f0
+Weighting = [1/8, 3/4, 1/8]
+.IP
+.I f1
+Weighting = [1/4, 1/2, 1/4]
+.IP
+default: f0
+.TP
+.B \--srgb-input -s 
+Set if the input is gamma corrected, though this will be inferred otherwise from the LUMINANCE tag in the pfs stream
+.TP
+.B \--linear-input -l
+As above, set if the input contains linear luminance values
+.TP
+.B \--verbose, -v
+Print extra information to stderr.
+.TP
+.B \--quiet, -q
+Disable warning message about the change in handling absolute values in RGBE files. See IMPORTANT NOTE below.
+
+.SH EXAMPLES
+
+.TP
+ pfsin frame%04d.exr | pfsoutyuv video%s.yuv
+Converts a sequence of frames frame0000.exr, frame0001.exr, ... to a yuv file. 
+
+.SH "SEE ALSO"
+.BR pfsin (1)
+
+.SH IMPORTANT NOTE
+
+.SH BUGS
+Please report bugs and comments on implementation to 
+the discussion group http://groups.google.com/group/pfstools

@@ -1,0 +1,96 @@
+.TH "pfsinyuv" 1
+.SH NAME
+pfsinyuv \- Read frames from a single .yuv file used by many video codecs
+.SH SYNOPSIS
+.B pfsinyuv [--verbose] [--quiet] [--width] [--height] [--colorspace] [--noguess] [--chroma-subsampling] [--bit-depth] [--frames] [--help]
+<file>
+
+.SH DESCRIPTION
+Use this command to read an uncompressed yuv file into a pfsstream.
+.PP
+<file> may contain one or more formatting strings, which describe the format of the yuv file. The formatting strings are:
+.TP
+.B %s
+The entire description in the format <width>x<height>_<fps><bitdepth>_<colorspace>_<chroma-format>, for example 1920x1080_25_10b_pq2020_420
+.TP
+.B %d
+Width in pixels
+.TP
+.B %d
+Height in pixels
+.TP
+.B %d
+Bit-depth in bits
+.TP
+.B %s
+Colorspace, such as 'bt709'
+.TP
+.B %s
+Chroma subsampling format, either '444' or '420'
+.SH OPTIONS
+.TP
+.B \--width, -w
+Specify the width in pixels of the YUV file
+.TP
+.B \--height, -h
+Specify the height in pixels of the YUV file
+.TP
+.B \--fps, -f
+Specify the frames per second of the YUV file
+.TP
+.B \--bit-depth, -b
+Bit-depth of the integer values stored in the yuv file. A single color component is stored as a byte if bit-depth is 8, or as two bytes otherwise. Default: 10 [bits]
+.TP
+.B \--chroma-format, -s
+Specify the chroma format of the YUV file. Can be one of:
+.IP
+.I 444
+Standard 4:4:4 YCbCr format, with no chroma downsampling
+.P
+.IP
+.I 420
+4:2:0 YCbCr format, with both colour channels downsampled by half
+.IP
+.I V210
+The v210 format is a packed YUV 4:2:2 (UYVY) format with 10 bits per component
+.P
+.PP
+.B \--colorspace, -c
+Currently it can be either:
+.IP
+.I pq2020 
+for HDR images with BT.2020 colorspace and PQ transfer function, or 
+.IP
+.I bt709
+for LDR images in BT.709 (rec.709) colorspace without any transfer function or
+.IP
+.I hlg2020 
+for HDR images with BT.2020 colorspace and HLG transfer function. 
+.PP
+If no option is specified, colorspace is inferred from the LUMINANNCE tag in the pfsstream: pq2020 if LUMINANCE is ABSOLUTE or RELATIVE, bt709 if LUMINANCE is DISPLAY.
+.TP
+.B \--no-guess, -n
+Don't try to extract image metadata from the filename
+.TP
+.B \--frames, -r
+Read only frames within the range specified as first:last, or first:step:last. The frames are indexed from 1, so that the to read the first and second frame one needs to specify 1:2. 
+.TP
+.B \--verbose, -v
+Print extra information to stderr.
+.TP
+.B \--quiet, -q
+Disable warning message about the change in handling absolute values in RGBE files. See IMPORTANT NOTE below.
+
+.SH EXAMPLES
+
+.TP
+pfsinyuv video_1920x1080_10b_25fps_pq2020_444.yuv --frames 100:-1:0 -v | pfsview
+
+.SH "SEE ALSO"
+.BR pfsin (1)
+
+.SH IMPORTANT NOTE
+
+.SH BUGS
+Please report bugs and comments on implementation to 
+the discussion group http://groups.google.com/group/pfstools

@@ -1,0 +1,22 @@
+To compile pfstools from sources on OSX, you need:
+1. XCode
+2. Any of:
+   Homebrew - http://brew.sh/ (recommended)
+   Fink - http://www.finkproject.org/
+   MacPorts - https://www.macports.org/
+
+Refer to REAME file for the instruction on how to compile with cmake.
+
+The build was tested to work on maxOS Sierra 10.12.6 on 13 Nov 2017 with Homebrew. The following notes can help get all dependencies recognized:
+
+* Qt5: You need to add "-D CMAKE_PREFIX_PATH=/usr/local/opt/qt5" to cmake. The path should be pointing where the Qt5 is installed.
+
+
+===== Image Magick =====
+
+In case of problems with ImageMagick on Mountain Lion:
+
+brew install libtool --universal
+brew link libtool --force
+brew install imagemagick --with-magick-plus-plus
+

@@ -1,0 +1,21 @@
+
+pfstools is in the first order supported on Ubuntu as this is the OS we use on everyday basis.
+
+The procedure below has been tested on Ubuntu 18.04 LTS and Ubuntu 20.04 LTS
+
+To compile pfstools on Ubuntu follow the steps:
+
+1. Execute:
+
+sudo apt-get install `cat ubuntu-packages-dep | tr '\n' ' '`
+
+2. If you want to install pfstools with Matlab support, follow the steps in README.Matlab
+
+3. From the pfstools directory, execute:
+
+mkdir build
+cd build
+cmake ../
+make
+sudo make install
+

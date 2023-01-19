@@ -1,0 +1,82 @@
+pfstools can be compiled under Windows from the cygwin
+environment. You can download cygwin from: http://www.cygwin.com/
+
+====================================================
+How to compile and install?
+====================================================
+
+This instruction was tested in August of 2021 with cygwin 3.2.0.
+
+1. Install 64-bit version of cygwin from https://cygwin.com/index.html
+
+2. Select the following cygwin packages:
+
+git
+gcc-g++
+make
+cmake
+perl
+zlib-devel
+libilmbase-devel
+libilmimf-devel
+libnetpbm-devel
+libMagick-devel (IMPORTANT: must be version 6. pfstools is incompatible with version 7.)
+libtiff-devel
+libgsl-devel
+libexif-devel
+libfftw3-devel
+libopencv-devel
+libraw
+
+Install the latest non-test release of each package. 
+
+The list does not include Qt and OpenGL packages so that pfsview will not be compiled. As pfsview is rather awkward to use using an X window client, it is recommended to use a native win32 version instead, as explained in Step 7. 
+
+3. Open cygwin terminal and clone the latest version of pfstools:
+
+git clone https://git.code.sf.net/p/pfstools/git pfstools
+
+Alternatively, you can compile from a prepackaged ZIP file, though the version may not be a bit outdated. 
+
+4. Using the cygwin terminal, create "build" directory and run cmake: 
+
+cd pfstools
+mkdir build
+cd build
+cmake ../
+
+Ignore warnings about missing OpenGL, Qt and Matlab compiler. Do not set MATLAB_MEX as the precompiled files will be installed in step 6.
+
+5. Make and install:
+
+make install
+
+6. Matlab interface comes precompiled in the "pfstools_matlab" directory. Add this directory to the matlab path. 
+
+7. For pfsview image viewer, unzip the win32 version of pfstools, which can be downloaded from:
+
+https://sourceforge.net/projects/pfstools/files/pfstools_visual_studio_incomplete/
+
+into "C:\Program Files (x86)\pfstools". Then, create a symbolic link (from Cygwin terminal):
+
+ln -s "/cygdrive/c/Program Files (x86)/pfstools/bin/pfsview.exe" /usr/local/bin/pfsview
+
+Repeat step 4 to install pfsv after the precompiled pfsview has been installed. 
+
+7. Test that everything works. 
+
+- In cygwin:
+
+pfsin <any_image.hdr> | pfsview
+
+- In matlab:
+
+pfs_test_shell
+I = pfs_read_image( '<any_image>.hdr' );
+pfsview( I );
+
+You can download some HDR images from:
+
+https://sourceforge.net/projects/pfstools/files/hdr_images/
+
+

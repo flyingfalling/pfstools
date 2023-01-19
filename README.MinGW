@@ -1,0 +1,37 @@
+It is possible to compile pfstools with MinGW. This is in particular useful for compiling native version of pfsview on Windows 10.
+
+The compilation was tested on 6/10/2019 with MinGW 7.3.0 64-bit, installed as a part of Qt5 installation. 
+
+To compile: 
+
+1) Install MinGW 7.3.0 64-bit from Qt5 maintenance tool (and relevant Qt5 libraries)
+
+2) Start Qt5 MinGW shell (type MinGW in the Windows search box)
+
+3) Go to the pfstools directory
+
+mkdir build_mingw
+cd build_mingw
+cmake -DWITH_OpenEXR=0 -G "MinGW Makefiles" ../
+
+"WITH_OpenEXR=0" is needed to disable checking for ZLIB. 
+
+4) Compile everything 
+
+mingw32-make
+
+If no "sed" command is installed, the installation may fail. In that case, add a line in src/fileformat/CMakeLists.txt:
+
+set( SHELL_CMDS  )
+
+and comment out:
+
+set( SHELL_CMDS pfsin pfsout pfsindcraw )
+
+
+
+
+
+
+
+

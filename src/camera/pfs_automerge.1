@@ -1,0 +1,25 @@
+.TH "pfs_automerge" 1
+.SH NAME
+pfs_automerge \- Script for scanning all subdirectories of a given directory and merging RAW files into HDR images
+.SH SYNOPSIS
+.B pfs_automerge
+[--\fBalign\fR|-\fBa\fR] [--\fBdest\fR <dir>|-\fBd\fR <dir>] [--\fBformat\fR (exr|hdr)|-\fBf\fR (exr|hdr)]
+.SH DESCRIPTION
+This command can be used to mass-merge multiple HDR images from RAW files, 
+where each exposure stack is stored in a separate directory. pfs_split_exposures
+can be used to automatically group RAW images into individual directories. 
+.SH OPTIONS
+.TP
+--\fBalign\fR, -\fBa\fR
+When set, the images will be aligned with pfsalign before merging.
+.TP
+--\fBdest\fR <dir>, -\fBd\fR <dir>
+Write merged HDR images into the directory <dir>. Default: "merged".
+.TP
+--\fBformat\fR (exr|hdr)|-\fBf\fR (exr|hdr)
+Store HDR images in OpenEXR format (exr) or Radiance RGBE (hdr). Default: "exr".
+.SH "SEE ALSO"
+.BR pfsinme (1), pfs_split_exposures (1)
+.SH BUGS
+Please report bugs and comments to the pfstools discussion group
+(http://groups.google.com/group/pfstools).

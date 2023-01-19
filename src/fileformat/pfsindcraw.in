@@ -1,0 +1,93 @@
+#!@BASH_PATH@
+############################################################
+# Wrapper for libraw and dcraw.
+# Convert digital camera RAW files to 16bit PPMs.
+#
+# this is a stub with basic functionality
+############################################################
+
+if test -z "$1" || test "$1" = "--help" || test "$1" = "-h"; then
+cat <<EOF
+
+Read an image in a camera RAW file format supported by
+LIBRAW or DCRAW and write pfs stream to the standard output
+as if read from 16bit ppm file (no gamma correction,
+white balance from camera if available).
+
+Usage: pfsindcraw <file> [<file>...]
+
+See the man page for more information.
+
+EOF
+    exit 1
+fi
+
+# Use libraw's emulation of dcraw if available
+libraw="/usr/lib/libraw/dcraw_emu"
+if which $libraw 2>/dev/null 1>/dev/null; then
+    use_libraw=true
+elif which dcraw_emu 2>/dev/null 1>/dev/null; then
+    use_libraw=true
+    libraw="dcraw_emu"
+elif which dcraw 2>/dev/null 1>/dev/null; then
+    use_libraw=false
+else
+    echo >&2 "pfsindcraw: neither libraw now dcraw program is found. Check if the program is installed and can be found in the PATH."
+    exit 1;
+fi
+
+if ! which pfsinppm 2>/dev/null 1>/dev/null; then
+    echo >&2 "pfsindcraw: pfsinppm program not found. Check if pfstools are compiled with netpbm support."
+    exit 1;
+fi
+
+COLORSPACE=1
+# Arguments used for all images passed to pfsindcraw
+global_arguments=""
+if test -n "$1"; then
+    while test "${1:0:1}" = "-"; do
+
+        case "$1" in
+			"--native" | "-n")
+				# Use native (RAW) color space
+				COLORSPACE=0
+				;;
+            "--dcraw" | "-d")
+                # Use dcraw instead of libraw
+                use_libraw=false
+                ;;
+            *)
+                echo >&2 "Unrecognized option '$1'."
+                exit 1;
+        esac
+        global_arguments="$global_arguments $1"              
+        shift             
+    done
+fi
+
+while test "$1"; do
+
+    # libraw-18 is unable to write to stdout.
+    # Future versions have option "-Z" for this purpose.
+    # TODO: change to -Z option once ubuntu switches to libraw-19
+    file_pattern="$1"
+    if $use_libraw; then
+        #temp_file=$(mktemp)
+        #cp $file_pattern $temp_file
+        #$libraw -o $COLORSPACE -4 -w $temp_file
+        #pfsinppm ${temp_file}.ppm | \
+        #    pfstag --set "FILE_NAME=${file_pattern}" --set "LUMINANCE=RELATIVE"
+        #rm $temp_file ${temp_file}.ppm
+
+        # Do not use temp (solves some issues on cygwin)
+        $libraw -o $COLORSPACE -4 -w $file_pattern
+        pfsinppm ${file_pattern}.ppm | \
+            pfstag --set "FILE_NAME=${file_pattern}" --set "LUMINANCE=RELATIVE"
+        rm $temp_file ${file_pattern}.ppm
+
+    else
+        dcraw -c -o $COLORSPACE -4 -w "$file_pattern" | pfsinppm - 2> /dev/null | \
+            pfstag --set "FILE_NAME=${file_pattern}" --set "LUMINANCE=RELATIVE"
+    fi
+    shift
+done
